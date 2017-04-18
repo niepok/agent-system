@@ -2,19 +2,23 @@ package pl.edu.agh.citylight;
 
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.OSMTileFactoryInfo;
+import org.jxmapviewer.VirtualEarthTileFactoryInfo;
 import org.jxmapviewer.input.PanKeyListener;
 import org.jxmapviewer.input.PanMouseInputListener;
 import org.jxmapviewer.input.ZoomMouseWheelListenerCursor;
 import org.jxmapviewer.viewer.*;
 
 import javax.swing.event.MouseInputListener;
+import java.awt.*;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 class Map {
     private JXMapViewer mapViewer = new JXMapViewer();
-    private Set<Waypoint> waypoints = new HashSet<>();
-    private WaypointPainter<Waypoint> waypointPainter = new WaypointPainter<>();
+    private Set<StreetLight> streetLights = new HashSet<>();
+    private WaypointPainter<StreetLight> streetLightPainter = new WaypointPainter<>();
 
     JXMapViewer getMapViewer() {
         return mapViewer;
@@ -28,7 +32,7 @@ class Map {
 	}
 
     private TileFactory createTileFactory() {
-        TileFactoryInfo info = new OSMTileFactoryInfo();
+        TileFactoryInfo info = new VirtualEarthTileFactoryInfo(VirtualEarthTileFactoryInfo.MAP);
         DefaultTileFactory tileFactory = new DefaultTileFactory(info);
         tileFactory.setThreadPoolSize(8);
         return tileFactory;
@@ -42,16 +46,25 @@ class Map {
         mapViewer.addKeyListener(new PanKeyListener(mapViewer));
     }
 
-    Waypoint addWaypoint(GeoPosition position) {
-        Waypoint waypoint = new DefaultWaypoint(position);
-        waypoints.add(waypoint);
-        waypointPainter.setWaypoints(waypoints);
-        mapViewer.setOverlayPainter(waypointPainter);
-        return waypoint;
+    StreetLight addStreetLight(GeoPosition position) {
+        StreetLight streetLight = new StreetLight(position);
+        streetLights.add(streetLight);
+        return streetLight;
     }
 
-	void removeWaypoint(Waypoint waypoint) {
-	    waypoints.remove(waypoint);
+	void removeStreetLight(StreetLight waypoint) {
+	    streetLights.remove(waypoint);
+    }
+
+    Optional<StreetLight> getNearestWaypoint(GeoPosition position) {
+        return streetLights.stream().
+                min(Comparator.comparing(i -> i.distance(position, mapViewer)));
+    }
+
+    void repaint() {
+        streetLightPainter.setWaypoints(streetLights);
+        mapViewer.setOverlayPainter(streetLightPainter);
+        Toolkit.getDefaultToolkit().sync();
     }
 
 }
