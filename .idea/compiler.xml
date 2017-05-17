@@ -9,8 +9,8 @@
         <module name="agent-system" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="agent-system" target="1.5" />
+    <bytecodeTargetLevel target="1.8">
+      <module name="agent-system" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
