@@ -35,6 +35,12 @@ public class App {
     private Car car;
     private static Vector lampMasters = new Vector();
     //private static HashMap<String, Set<StreetLight>> lampsMasterssss = new HashMap<>();
+    public static final double LAMPRANGE = 50.0;
+
+    //speed parameters
+    private static double timerPeriod = 25.0;
+    private static double latInc = 0.00002;
+    private static double lonInc = 0.00002;
 
 
     public static void main(String[] args) {
@@ -58,9 +64,9 @@ public class App {
         }
 
         window.addListeners();
-        window.timer = new Timer(25, actionEvent -> {
-            double lat = window.car.getPosition().getLatitude() + 0.00001;
-            double lon = window.car.getPosition().getLongitude() + 0.00001;
+        window.timer = new Timer((int) timerPeriod, actionEvent -> {
+            double lat = window.car.getPosition().getLatitude() + latInc;
+            double lon = window.car.getPosition().getLongitude() + lonInc;
             window.car.setPosition(new GeoPosition(lat, lon));
             map.repaint();
         });

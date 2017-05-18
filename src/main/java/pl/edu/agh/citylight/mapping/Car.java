@@ -7,7 +7,7 @@ import pl.edu.agh.citylight.agents.CarAgent;
 
 public class Car extends Waypoint2D {
     private CarAgent agent;
-    private double speed = 1.0;
+    private double speed = 5.0;
     public CarAgent getAgent() {
         return agent;
     }

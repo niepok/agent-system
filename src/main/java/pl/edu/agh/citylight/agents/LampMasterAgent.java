@@ -11,8 +11,12 @@ import jade.wrapper.StaleProxyException;
 import pl.edu.agh.citylight.mapping.Map;
 import pl.edu.agh.citylight.mapping.Waypoint2D;
 
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.Vector;
+
+import static pl.edu.agh.citylight.App.LAMPRANGE;
 
 /**
  * Created by Adam on 09.05.2017.
@@ -94,6 +98,8 @@ public class LampMasterAgent extends Agent {
         private boolean status = false;
         private double workTime = 10.0;
         private double speed;
+        private int counter;
+        private Set<AID> turnOffSignals = new HashSet<>();
 
         /**
          * Required method
@@ -104,21 +110,21 @@ public class LampMasterAgent extends Agent {
          * holdSensor - message send to CarSensor Behav. of LampAgent, it turns on WakerBehaviour in lampagent, params: workTime
          * turnOffMSG - opposite of turnOnMSG
          */
+        @SuppressWarnings("Duplicates")
         public void action() {
             MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null){
-                if(!status) {
-                   if(msg.getConversationId().equals("wake-master")) {
-                       status = true;
+               if(msg.getConversationId().equals("wake-master")) {
+                   if(!status) {
+                       counter=0;
                        speed = Double.parseDouble(msg.getContent());
-                       workTime = length / speed;
+                       workTime = (length+LAMPRANGE) / speed;
                        ACLMessage holdSensor = new ACLMessage(ACLMessage.INFORM);
                        for (int i = 0; i < lampsToManage.size(); i++) {
                            holdSensor.addReceiver((AID) lampsToManage.get(i));
                            holdSensor.setContent(String.valueOf(workTime));
                            holdSensor.setConversationId("hold-sensor");
-                           holdSensor.setReplyWith("holdSensor" + System.currentTimeMillis());
                            myAgent.send(holdSensor);
                        }
                        System.out.println("Turning on the lamps for " + workTime + " sec...");
@@ -127,23 +133,46 @@ public class LampMasterAgent extends Agent {
                            turnOnMSG.addReceiver((AID) lampsToManage.get(i));
                            turnOnMSG.setContent(String.valueOf(workTime));
                            turnOnMSG.setConversationId("lamps-working");
-                           turnOnMSG.setReplyWith("turnOnMSG" + System.currentTimeMillis());
                            myAgent.send(turnOnMSG);
                        }
+                       status = true;
+                   } else {
+                       if(turnOffSignals.contains(msg.getSender())) {
+                           turnOffSignals.remove(msg.getSender());
+                           System.out.println(msg.getSender().getName()+" having cars again");
+                       }
                    }
-                } else {
-                    if(msg.getConversationId().equals("sleep-master")) {
-                        System.out.println("Turning off the lamps...");
-                        ACLMessage turnOffMSG = new ACLMessage(ACLMessage.REQUEST);
-                        for (Iterator i = lampsToManage.iterator(); i.hasNext(); ) {
-                            turnOffMSG.addReceiver((AID) i.next());
-                        }
-                        turnOffMSG.setConversationId("lamps-stop-working");
-                        turnOffMSG.setReplyWith("turnOffMSG" + System.currentTimeMillis());
-                        myAgent.send(turnOffMSG);
-                        status = false;
-                    }
-                }
+               } else if(msg.getConversationId().equals("still-cars")) {
+                   if(status) {
+                       speed = Double.parseDouble(msg.getContent());
+                       workTime = (length + LAMPRANGE) / speed;
+                       ACLMessage holdSensor = new ACLMessage(ACLMessage.INFORM);
+                       for (int i = 0; i < lampsToManage.size(); i++) {
+                           holdSensor.addReceiver((AID) lampsToManage.get(i));
+                           holdSensor.setContent(String.valueOf(workTime));
+                           holdSensor.setConversationId("hold-sensor");
+                           myAgent.send(holdSensor);
+                       }
+                   }
+               } else if(msg.getConversationId().equals("sleep-master")) {
+                   if (status) {
+                       if (!turnOffSignals.contains(msg.getSender())) {
+                           turnOffSignals.add(msg.getSender());
+                           System.out.println(msg.getSender().getName()+" not having cars");
+                       }
+                       if (turnOffSignals.size() >= lampsToManage.size()) {
+                           System.out.println("Turning off the lamps...");
+                           ACLMessage turnOffMSG = new ACLMessage(ACLMessage.REQUEST);
+                           for (int i = 0; i < lampsToManage.size(); i++) {
+                               turnOffMSG.addReceiver((AID) lampsToManage.get(i));
+                               turnOffMSG.setConversationId("lamps-stop-working");
+                               myAgent.send(turnOffMSG);
+                           }
+                           status = false;
+                           turnOffSignals.clear();
+                       }
+                   }
+               }
             } else {
                 block();
             }
