@@ -8,6 +8,7 @@ import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import pl.edu.agh.citylight.mapping.Car;
 
 
 /**
@@ -26,6 +27,9 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
  *      synchronization with OSM
  */
 public class CarAgent extends Agent{
+
+    private Car car;
+
     private double speed;
 
     /**
@@ -47,7 +51,7 @@ public class CarAgent extends Agent{
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
         sd.setType("car-approaching");
-        sd.setName("citylight-car-agent");
+        sd.setName(car.getStringPosition());
         dfd.addServices(sd);
         try {
             DFService.register(this, dfd);
@@ -107,5 +111,13 @@ public class CarAgent extends Agent{
                 block();
             }
         }
+    }
+
+    public Car getCar() {
+        return car;
+    }
+
+    public void setCar(Car position) {
+        this.car = position;
     }
 }

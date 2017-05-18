@@ -9,6 +9,7 @@ import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import pl.edu.agh.citylight.mapping.StreetLight;
 
 /**
  * Created by Adam on 09.05.2017.
@@ -31,8 +32,11 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
  * carSensorPeriod - passed from Master, time in milliseconds, how often do the sensor check for car presence
  *
  */
+@SuppressWarnings("Duplicates")
 public class LampAgent2 extends Agent {
-    private String location = "Lamp";
+
+    private StreetLight position;
+
     private AID[] carAgents;
     private AID master;
     private MessageTemplate carSensorMT;
@@ -293,5 +297,13 @@ public class LampAgent2 extends Agent {
      */
     protected void takeDown(){
         System.out.println("Lamp-agent "+getAID().getName()+" terminating.");
+    }
+
+    public StreetLight getPosition() {
+        return position;
+    }
+
+    public void setPosition(StreetLight position) {
+        this.position = position;
     }
 }

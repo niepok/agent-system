@@ -8,6 +8,7 @@ import jade.lang.acl.MessageTemplate;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
+import pl.edu.agh.citylight.mapping.Map;
 
 import java.util.Iterator;
 import java.util.Vector;
@@ -40,6 +41,7 @@ public class LampMasterAgent extends Agent {
     private double length;
     private int lampsAmount;
     private Vector lampsToManage = new Vector();
+    protected Map map;
 
     /**
      * Required method
@@ -59,9 +61,10 @@ public class LampMasterAgent extends Agent {
         AgentController ac;
         lampsToManage.clear();
         Object[] args = getArguments(); //seconds for car sensor passed
-        Object[] argss = {this.getAID(), args[2]};
+        Object[] argss = {this.getAID(), args[2], args[3]};
         lampsAmount = Integer.parseInt(String.valueOf(args[1]));
         length = Double.parseDouble(String.valueOf(args[0]));
+        map=(Map) args[3];
         for (int i = 0; i<lampsAmount; i++){
             try {
                 ac=cc.createNewAgent("lamp_"+i, "LampAgent2", argss);
@@ -87,7 +90,6 @@ public class LampMasterAgent extends Agent {
      * speed - cars' speed, received from LampAgent
      */
     private class WaitingForSignal extends CyclicBehaviour {
-        private AID sourceLamp;
         private boolean status = false;
         private double workTime = 10.0;
         private double speed;
@@ -107,7 +109,6 @@ public class LampMasterAgent extends Agent {
             if (msg != null){
                 if(!status) {
                    if(msg.getConversationId().equals("wake-master")) {
-                        sourceLamp = msg.getSender();
                         speed = Double.parseDouble(msg.getContent());
                         workTime = length / speed;
                         System.out.println("Turning on the lamps for " + workTime + " sec...");
