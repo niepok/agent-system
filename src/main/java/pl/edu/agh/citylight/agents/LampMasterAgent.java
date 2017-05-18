@@ -8,6 +8,8 @@ import jade.lang.acl.MessageTemplate;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
+import pl.edu.agh.citylight.mapping.Map;
+import pl.edu.agh.citylight.mapping.Waypoint2D;
 
 import java.util.Iterator;
 import java.util.Vector;
@@ -40,6 +42,7 @@ public class LampMasterAgent extends Agent {
     private double length;
     private int lampsAmount;
     private Vector lampsToManage = new Vector();
+    private Map map;
 
     /**
      * Required method
@@ -59,12 +62,13 @@ public class LampMasterAgent extends Agent {
         AgentController ac;
         lampsToManage.clear();
         Object[] args = getArguments(); //seconds for car sensor passed
-        Object[] argss = {this.getAID(), args[2]};
         lampsAmount = Integer.parseInt(String.valueOf(args[1]));
-        length = Double.parseDouble(String.valueOf(args[0]));
-        for (int i = 0; i<lampsAmount; i++){
+        map = (Map) args[3];
+        length = map.getLampList().get(0).distance(map.getLampList().get((map.getLampList().size())-1).getPosition());
+        for (int i = 0; i<lampsAmount-1; i++){
             try {
-                ac=cc.createNewAgent("lamp_"+i, "LampAgent2", argss);
+                Object[] argss = {this.getAID(), args[2], args[3], map.getLampList().get(i)};
+                ac=cc.createNewAgent("lamp_"+i, "pl.edu.agh.citylight.agents.LampAgent2", argss);
                 ac.start();
                 lampsToManage.add(new AID("lamp_"+i, AID.ISLOCALNAME));
             } catch (StaleProxyException e) {
@@ -87,7 +91,6 @@ public class LampMasterAgent extends Agent {
      * speed - cars' speed, received from LampAgent
      */
     private class WaitingForSignal extends CyclicBehaviour {
-        private AID sourceLamp;
         private boolean status = false;
         private double workTime = 10.0;
         private double speed;
@@ -107,26 +110,27 @@ public class LampMasterAgent extends Agent {
             if (msg != null){
                 if(!status) {
                    if(msg.getConversationId().equals("wake-master")) {
-                        sourceLamp = msg.getSender();
-                        speed = Double.parseDouble(msg.getContent());
-                        workTime = length / speed;
-                        System.out.println("Turning on the lamps for " + workTime + " sec...");
-                        ACLMessage turnOnMSG = new ACLMessage(ACLMessage.REQUEST);
-                        ACLMessage holdSensor = new ACLMessage(ACLMessage.INFORM);
-                        for (int i = 0; i < lampsToManage.size(); i++) {
-                            turnOnMSG.addReceiver((AID) lampsToManage.get(i));
-                            holdSensor.addReceiver((AID) lampsToManage.get(i));
-                            turnOnMSG.setContent(String.valueOf(workTime));
-                            holdSensor.setContent(String.valueOf(workTime));
-                            turnOnMSG.setConversationId("lamps-working");
-                            holdSensor.setConversationId("hold-sensor");
-                            turnOnMSG.setReplyWith("turnOnMSG" + System.currentTimeMillis());
-                            holdSensor.setReplyWith("holdSensor" + System.currentTimeMillis());
-                            myAgent.send(turnOnMSG);
-                            myAgent.send(holdSensor);
-                        }
-                        status = true;
-                    }
+                       status = true;
+                       speed = Double.parseDouble(msg.getContent());
+                       workTime = length / speed;
+                       ACLMessage holdSensor = new ACLMessage(ACLMessage.INFORM);
+                       for (int i = 0; i < lampsToManage.size(); i++) {
+                           holdSensor.addReceiver((AID) lampsToManage.get(i));
+                           holdSensor.setContent(String.valueOf(workTime));
+                           holdSensor.setConversationId("hold-sensor");
+                           holdSensor.setReplyWith("holdSensor" + System.currentTimeMillis());
+                           myAgent.send(holdSensor);
+                       }
+                       System.out.println("Turning on the lamps for " + workTime + " sec...");
+                       ACLMessage turnOnMSG = new ACLMessage(ACLMessage.REQUEST);
+                       for (int i = 0; i < lampsToManage.size(); i++) {
+                           turnOnMSG.addReceiver((AID) lampsToManage.get(i));
+                           turnOnMSG.setContent(String.valueOf(workTime));
+                           turnOnMSG.setConversationId("lamps-working");
+                           turnOnMSG.setReplyWith("turnOnMSG" + System.currentTimeMillis());
+                           myAgent.send(turnOnMSG);
+                       }
+                   }
                 } else {
                     if(msg.getConversationId().equals("sleep-master")) {
                         System.out.println("Turning off the lamps...");

@@ -10,13 +10,11 @@ import org.jxmapviewer.viewer.*;
 
 import javax.swing.event.MouseInputListener;
 import java.awt.*;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class Map {
     private JXMapViewer mapViewer = new JXMapViewer();
+    private ArrayList<StreetLight> lampList = new ArrayList<>();
     private Set<StreetLight> streetLights = new HashSet<>();
     private Set<Car> cars = new HashSet<>();
     private WaypointPainter<Waypoint2D> streetLightPainter = new WaypointPainter<>();
@@ -52,6 +50,7 @@ public class Map {
 
     public StreetLight addStreetLight(GeoPosition position) {
         StreetLight streetLight = new StreetLight(position, mapViewer);
+        lampList.add(streetLight);
         streetLights.add(streetLight);
         return streetLight;
     }
@@ -91,4 +90,7 @@ public class Map {
         Toolkit.getDefaultToolkit().sync();
     }
 
+    public ArrayList<StreetLight> getLampList() {
+        return lampList;
+    }
 }

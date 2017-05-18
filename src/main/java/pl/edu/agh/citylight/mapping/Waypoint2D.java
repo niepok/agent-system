@@ -14,7 +14,7 @@ public class Waypoint2D extends DefaultWaypoint {
         this.mapViewer = mapViewer;
     }
 
-    double distance(GeoPosition otherPosition) {
+    public double distance(GeoPosition otherPosition) {
         Point2D thisPoint = mapViewer.convertGeoPositionToPoint(this.getPosition());
         Point2D otherPoint = mapViewer.convertGeoPositionToPoint(otherPosition);
         return thisPoint.distance(otherPoint);
