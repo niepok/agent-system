@@ -5,6 +5,7 @@ import org.jxmapviewer.VirtualEarthTileFactoryInfo;
 import org.jxmapviewer.input.PanKeyListener;
 import org.jxmapviewer.input.PanMouseInputListener;
 import org.jxmapviewer.input.ZoomMouseWheelListenerCursor;
+import org.jxmapviewer.painter.CompoundPainter;
 import org.jxmapviewer.viewer.*;
 
 import javax.swing.event.MouseInputListener;
@@ -18,7 +19,10 @@ public class Map {
     private JXMapViewer mapViewer = new JXMapViewer();
     private Set<StreetLight> streetLights = new HashSet<>();
     private Set<Car> cars = new HashSet<>();
-    private WaypointPainter<StreetLight> streetLightPainter = new WaypointPainter<>();
+    private WaypointPainter<Waypoint2D> streetLightPainter = new WaypointPainter<>();
+    private WaypointPainter<Waypoint2D> carPainter = new WaypointPainter<>();
+    @SuppressWarnings("unchecked")
+    private CompoundPainter<JXMapViewer> painters = new CompoundPainter<>(streetLightPainter, carPainter);
 
     public JXMapViewer getMapViewer() {
         return mapViewer;
@@ -52,6 +56,12 @@ public class Map {
         return streetLight;
     }
 
+    public Car addCar(GeoPosition position) {
+        Car car = new Car(position, mapViewer);
+        cars.add(car);
+        return car;
+    }
+
 	public void removeStreetLight(StreetLight waypoint) {
 	    streetLights.remove(waypoint);
     }
@@ -66,9 +76,18 @@ public class Map {
                 min(Comparator.comparing(i -> i.distance(position)));
     }
 
+    public Optional<Car> getNearestCar(GeoPosition position, double maxDistance) {
+        Optional<Car> car = getNearestCar(position);
+        if(car.isPresent() && car.get().distance(position) > maxDistance) {
+            return Optional.empty();
+        }
+        return car;
+    }
+
     public void repaint() {
         streetLightPainter.setWaypoints(streetLights);
-        mapViewer.setOverlayPainter(streetLightPainter);
+        carPainter.setWaypoints(cars);
+        mapViewer.setOverlayPainter(painters);
         Toolkit.getDefaultToolkit().sync();
     }
 
