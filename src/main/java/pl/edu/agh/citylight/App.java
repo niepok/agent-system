@@ -8,31 +8,19 @@ import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.viewer.GeoPosition;
-import pl.edu.agh.citylight.mapping.Car;
 import pl.edu.agh.citylight.mapping.Map;
-import pl.edu.agh.citylight.mapping.StreetLight;
+import pl.edu.agh.citylight.mapping.adapters.CarAdapter;
+import pl.edu.agh.citylight.mapping.adapters.EchoAdapter;
 
 import javax.swing.*;
 import javax.swing.Timer;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.*;
-
-import static java.awt.event.MouseEvent.BUTTON1;
-import static java.awt.event.MouseEvent.BUTTON3;
 
 public class App {
     private JXMapViewer mapViewer;
     private JButton button;
     private Map map;
-    private Timer timer;
-    private Car car;
     private static Vector lampMasters = new Vector();
     //private static HashMap<String, Set<StreetLight>> lampsMasterssss = new HashMap<>();
     public static final double LAMPRANGE = 50.0;
@@ -42,10 +30,17 @@ public class App {
     private static double latInc = 0.00002;
     private static double lonInc = 0.00002;
 
+    //intersection simulation parameters
+    private static GeoPosition car1StartPos = new GeoPosition(50.032651998280635, 20.011188983917236);
+    private static GeoPosition car1EndPos = new GeoPosition(50.036194190130736, 20.011789798736572);
+    private static GeoPosition car2StartPos = new GeoPosition(50.036021910580374, 20.007508993148804);
+    private static GeoPosition car2EndPos = new GeoPosition(50.03358925734411, 20.01459002494812);
+    private static GeoPosition defaultPosition = new GeoPosition(50.03458,20.01169);
+
+
 
     public static void main(String[] args) {
-        GeoPosition defaultPosition = new GeoPosition(50.0625,19.9388); //Krakow
-        Map map = new Map(defaultPosition);
+        Map map = new Map(defaultPosition, 2);
         App window = new App(map);
         for(int i=0; i<3;i++){
             map.addStreetLight(new GeoPosition(50.0675+i*0.01, 19.9438+i*0.01));
@@ -64,12 +59,6 @@ public class App {
         }
 
         window.addListeners();
-        window.timer = new Timer((int) timerPeriod, actionEvent -> {
-            double lat = window.car.getPosition().getLatitude() + latInc;
-            double lon = window.car.getPosition().getLongitude() + lonInc;
-            window.car.setPosition(new GeoPosition(lat, lon));
-            map.repaint();
-        });
     }
 
     App(Map map) {
@@ -90,26 +79,16 @@ public class App {
     }
 
     private void addListeners() {
-        mapViewer.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent mouseEvent) {
-                int mouseButton = mouseEvent.getButton();
-                Point point = mouseEvent.getPoint();
-                GeoPosition position = mapViewer.convertPointToGeoPosition(point);
-                if (mouseButton == BUTTON1) {
-                    map.addStreetLight(position);
-                }
-                else if (mouseButton == BUTTON3) {
-                    Optional<StreetLight> nearestStreetLight = map.getNearestStreetLight(position);
-                    nearestStreetLight.ifPresent(map::removeStreetLight);
-                }
-                map.repaint();
-            }
-        });
+        mapViewer.addMouseListener(new EchoAdapter(map));
+        mapViewer.addMouseListener(new CarAdapter(map, defaultPosition));
+        button.addActionListener(actionEvent -> startSimulation());
+    }
 
-        button.addActionListener(actionEvent -> {
-            car = map.addCar(new GeoPosition(50.0625,19.9388));
-            timer.start();
+    private void startSimulation() {
+        Timer timer = new Timer((int) timerPeriod, actionEvent -> {
+            map.moveCars();
+            map.repaint();
         });
+        timer.start();
     }
 }

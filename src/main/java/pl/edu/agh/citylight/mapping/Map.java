@@ -26,27 +26,12 @@ public class Map {
         return mapViewer;
     }
 
-	public Map(GeoPosition centerPosition) {
+	public Map(GeoPosition centerPosition, int zoom) {
 	    mapViewer.setTileFactory(createTileFactory());
 	    mapViewer.setCenterPosition(centerPosition);
-        mapViewer.setZoom(7);
+        mapViewer.setZoom(zoom);
         addListeners();
 	}
-
-    private TileFactory createTileFactory() {
-        TileFactoryInfo info = new VirtualEarthTileFactoryInfo(VirtualEarthTileFactoryInfo.MAP);
-        DefaultTileFactory tileFactory = new DefaultTileFactory(info);
-        tileFactory.setThreadPoolSize(8);
-        return tileFactory;
-    }
-
-    private void addListeners(){
-        MouseInputListener mia = new PanMouseInputListener(mapViewer);
-        mapViewer.addMouseListener(mia);
-        mapViewer.addMouseMotionListener(mia);
-        mapViewer.addMouseWheelListener(new ZoomMouseWheelListenerCursor(mapViewer));
-        mapViewer.addKeyListener(new PanKeyListener(mapViewer));
-    }
 
     public StreetLight addStreetLight(GeoPosition position) {
         StreetLight streetLight = new StreetLight(position, mapViewer);
@@ -54,27 +39,22 @@ public class Map {
         streetLights.add(streetLight);
         return streetLight;
     }
-
-    public Car addCar(GeoPosition position) {
-        Car car = new Car(position, mapViewer);
-        cars.add(car);
-        return car;
+    public void removeStreetLight(StreetLight waypoint) {
+        streetLights.remove(waypoint);
     }
-
-	public void removeStreetLight(StreetLight waypoint) {
-	    streetLights.remove(waypoint);
-    }
-
     public Optional<StreetLight> getNearestStreetLight(GeoPosition position) {
         return streetLights.stream().
                 min(Comparator.comparing(i -> i.distance(position)));
     }
 
-    public Optional<Car> getNearestCar(GeoPosition position) {
-        return cars.stream().
-                min(Comparator.comparing(i -> i.distance(position)));
+    public Car addCar(GeoPosition startPosition, GeoPosition targetPosition) {
+        Car car = new Car(startPosition, targetPosition, mapViewer);
+        cars.add(car);
+        return car;
     }
-
+    public void moveCars() {
+        cars.forEach(Car::move);
+    }
     public Optional<Car> getNearestCar(GeoPosition position, double maxDistance) {
         Optional<Car> car = getNearestCar(position);
         if(car.isPresent() && car.get().distance(position) > maxDistance) {
@@ -93,4 +73,25 @@ public class Map {
     public ArrayList<StreetLight> getLampList() {
         return lampList;
     }
+
+    private Optional<Car> getNearestCar(GeoPosition position) {
+        return cars.stream().
+                min(Comparator.comparing(i -> i.distance(position)));
+    }
+
+    private TileFactory createTileFactory() {
+        TileFactoryInfo info = new VirtualEarthTileFactoryInfo(VirtualEarthTileFactoryInfo.MAP);
+        DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+        tileFactory.setThreadPoolSize(8);
+        return tileFactory;
+    }
+
+    private void addListeners(){
+        MouseInputListener mia = new PanMouseInputListener(mapViewer);
+        mapViewer.addMouseListener(mia);
+        mapViewer.addMouseMotionListener(mia);
+        mapViewer.addMouseWheelListener(new ZoomMouseWheelListenerCursor(mapViewer));
+        mapViewer.addKeyListener(new PanKeyListener(mapViewer));
+    }
+
 }
