@@ -11,6 +11,7 @@ import org.jxmapviewer.viewer.*;
 import javax.swing.event.MouseInputListener;
 import java.awt.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Map {
     private JXMapViewer mapViewer = new JXMapViewer();
@@ -45,6 +46,12 @@ public class Map {
     public Optional<StreetLight> getNearestStreetLight(GeoPosition position) {
         return streetLights.stream().
                 min(Comparator.comparing(i -> i.distance(position)));
+    }
+
+    public Set<StreetLight> getStreetLights(GeoPosition position, double radius) {
+        return streetLights.stream().
+                filter(i -> (i.distance(position) <= radius)).
+                collect(Collectors.toSet());
     }
 
     public Car addCar(GeoPosition startPosition, GeoPosition targetPosition) {
