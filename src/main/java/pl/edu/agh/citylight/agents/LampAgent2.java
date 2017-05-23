@@ -96,35 +96,8 @@ public class LampAgent2 extends Agent {
         }
 
         protected void onTick() {
-//            MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
-//            ACLMessage msg = myAgent.receive(mt);
-//            if(sensorStatus!=SensorStatus.HOLDING) {
-//                if (msg != null && msg.getConversationId().equals("hold-sensor")) {
-//                    workTime = Double.parseDouble(msg.getContent());
-//                    long timeout = (long) workTime * 1000 - this.getPeriod();
-//                    sensorStatus = SensorStatus.HOLDING;
-//                    System.out.println(getAID().getName() + " " + sensorStatus + " Putting sensor to sleep for " + timeout / 1000 + " sec");
-//
-//                    /**
-//                     * Anonymus class WakerBehaviour
-//                     * Holds looking for new cars (and all other processes in fact) after turning on the lamps
-//                     * Launched after receiving proper message from Master
-//                     *
-//                     * timeout - period during which lamp is asleep (only shinin bright like a diamond)
-//                     * after timeout changing status to SCANNING - diffrent than waiting for new cars - due to light status
-//                     * and its opportunity to be turned off
-//                     */
-//                    addBehaviour(new WakerBehaviour(LampAgent2.this, timeout) {
-//                        protected void onWake() {
-//                            sensorStatus = SensorStatus.SCANNING;
-//                            communicationStatus = false;
-//                            System.out.println(getAID().getName() + " " + sensorStatus + " Scanning again...");
-//                        }
-//                    });
-//                }
             if(sensorStatus==SensorStatus.SCANNING || sensorStatus==SensorStatus.WAITING){
                 System.out.println(getAID().getName() +" "+sensorStatus+ " Checking if car is approaching");
-                    //nearestCar = map.getNearestCar(position.getPosition(), LAMPRANGE).get();
                     nearestCars = map.getNearestCars(position.getPosition(), LAMPRANGE);
                     if(nearestCars.size()>0) {
                         System.out.println(getAID().getName() + " " + sensorStatus + " found car nearby: " + nearestCars.size());
@@ -136,7 +109,6 @@ public class LampAgent2 extends Agent {
                         receivedSignals.put(this.getAgent().getAID(), carsDetected);
                         sensorStatus = SensorStatus.CARS_DETECTED;
                     } else if(sensorStatus==SensorStatus.SCANNING){
-                        //} catch (NoSuchElementException e) {
                         receivedSignals.remove(this.getAgent().getAID());
                         sensorStatus=SensorStatus.NO_MORE_CARS;
                     }
@@ -174,35 +146,8 @@ public class LampAgent2 extends Agent {
                         communicationStatus = true;
                         if (ledStatus) sensorStatus=SensorStatus.SCANNING;
                     }
-//                    if (!ledStatus && !communicationStatus) {
-//                        System.out.println(getAID().getName() +" "+sensorStatus+ " waking neighbours");
-//                        ACLMessage wakeMaster = new ACLMessage(ACLMessage.INFORM);
-//                        wakeMaster.addReceiver(master);
-//                        wakeMaster.setContent(String.valueOf(speed));
-//                        wakeMaster.setConversationId("wake-master");
-//                        myAgent.send(wakeMaster);
-//                        communicationStatus = true;
-//                    }
-//                    else if (ledStatus && !communicationStatus){
-//                        System.out.println(getAID().getName() +" "+sensorStatus+ " still having cars");
-//                        ACLMessage stillCars = new ACLMessage(ACLMessage.INFORM);
-//                        stillCars.addReceiver(master);
-//                        stillCars.setContent(String.valueOf(speed));
-//                        stillCars.setConversationId("still-cars");
-//                        myAgent.send(stillCars);
-//                        communicationStatus = true;
-//                    }
                     break;
                 case NO_MORE_CARS:
-//                    if(ledStatus) {
-//                        ACLMessage sleepMaster = new ACLMessage(ACLMessage.INFORM);
-//                        sleepMaster.addReceiver(master);
-//                        sleepMaster.setConversationId("sleep-master");
-//                        sleepMaster.setSender(this.getAgent().getAID());
-//                        myAgent.send(sleepMaster);
-//                        speed = 0.0;
-//                        communicationStatus = true;
-//                    }
                     ACLMessage noMoreCars = new ACLMessage(ACLMessage.INFORM);
                     for(StreetLight lamp : neighbourLamps){
                         noMoreCars.addReceiver(lamp.getAgent());

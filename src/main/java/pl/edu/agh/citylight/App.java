@@ -33,8 +33,6 @@ public class App {
     private Map map;
     private Timer timer;
     private Car car;
-    private static Vector lampMasters = new Vector();
-    //private static HashMap<String, Set<StreetLight>> lampsMasterssss = new HashMap<>();
     public static final double LAMPRANGE = 25.0;
 
     //speed parameters
