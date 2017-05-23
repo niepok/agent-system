@@ -26,7 +26,7 @@ public class StreetLightAdapter extends MouseAdapter {
         Point point = mouseEvent.getPoint();
         GeoPosition position = map.getMapViewer().convertPointToGeoPosition(point);
         if (mouseButton == BUTTON1) {
-            map.addStreetLight(position);
+            map.addStreetLight(position,null);
         }
         else if (mouseButton == BUTTON3) {
             Optional<StreetLight> nearestStreetLight = map.getNearestStreetLight(position);

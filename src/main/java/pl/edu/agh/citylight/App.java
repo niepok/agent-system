@@ -8,6 +8,7 @@ import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.viewer.GeoPosition;
+import pl.edu.agh.citylight.agents.LampAgentInit;
 import pl.edu.agh.citylight.mapping.Map;
 import pl.edu.agh.citylight.mapping.adapters.CarAdapter;
 import pl.edu.agh.citylight.mapping.adapters.EchoAdapter;
@@ -16,19 +17,24 @@ import javax.swing.*;
 import javax.swing.Timer;
 import java.awt.*;
 import java.util.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.*;
+
+import static java.awt.event.MouseEvent.BUTTON1;
+import static java.awt.event.MouseEvent.BUTTON3;
 
 public class App {
     private JXMapViewer mapViewer;
     private JButton button;
     private Map map;
-    private static Vector lampMasters = new Vector();
-    //private static HashMap<String, Set<StreetLight>> lampsMasterssss = new HashMap<>();
-    public static final double LAMPRANGE = 50.0;
 
-    //speed parameters
-    private static double timerPeriod = 25.0;
-    private static double latInc = 0.00002;
-    private static double lonInc = 0.00002;
+
 
     //intersection simulation parameters
     private static GeoPosition car1StartPos = new GeoPosition(50.032651998280635, 20.011188983917236);
@@ -38,23 +44,25 @@ public class App {
     private static GeoPosition defaultPosition = new GeoPosition(50.03458,20.01169);
 
 
+    public static final double LAMPRANGE = 60.0;
+
+    //speed parameters
+    private static double timerPeriod = 25.0;
+    private static double latInc = 0.00001;
+    private static double lonInc = 0.00001;
+
 
     public static void main(String[] args) {
-        Map map = new Map(defaultPosition, 2);
+        Map map = new Map(defaultPosition, 3);
         App window = new App(map);
-        for(int i=0; i<3;i++){
-            map.addStreetLight(new GeoPosition(50.0675+i*0.01, 19.9438+i*0.01));
-        }
-
         Profile p = new ProfileImpl(true);
         ContainerController cc = jade.core.Runtime.instance().createMainContainer(p);
-        Object[] argss = {1000,4,"5",map};
         AgentController ac;
-        try {
-            ac = cc.createNewAgent("master1", "pl.edu.agh.citylight.agents.LampMasterAgent", argss);
+        Object[] argss = {p,cc,map};
+        try{
+            ac = cc.createNewAgent("lampinit", "pl.edu.agh.citylight.agents.LampAgentInit", argss);
             ac.start();
-            lampMasters.add(new AID("master1", AID.ISLOCALNAME));
-        } catch (StaleProxyException e) {
+        }catch (StaleProxyException e) {
             e.printStackTrace();
         }
 

@@ -1,5 +1,6 @@
 package pl.edu.agh.citylight.mapping;
 
+import jade.core.AID;
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.VirtualEarthTileFactoryInfo;
 import org.jxmapviewer.input.PanKeyListener;
@@ -34,8 +35,23 @@ public class Map {
         addListeners();
 	}
 
-    public StreetLight addStreetLight(GeoPosition position) {
-        StreetLight streetLight = new StreetLight(position, mapViewer);
+    private TileFactory createTileFactory() {
+        TileFactoryInfo info = new VirtualEarthTileFactoryInfo(VirtualEarthTileFactoryInfo.MAP);
+        DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+        tileFactory.setThreadPoolSize(8);
+        return tileFactory;
+    }
+
+    private void addListeners(){
+        MouseInputListener mia = new PanMouseInputListener(mapViewer);
+        mapViewer.addMouseListener(mia);
+        mapViewer.addMouseMotionListener(mia);
+        mapViewer.addMouseWheelListener(new ZoomMouseWheelListenerCursor(mapViewer));
+        mapViewer.addKeyListener(new PanKeyListener(mapViewer));
+    }
+
+    public StreetLight addStreetLight(GeoPosition position, AID agent) {
+        StreetLight streetLight = new StreetLight(position, mapViewer, agent);
         lampList.add(streetLight);
         streetLights.add(streetLight);
         return streetLight;
@@ -53,6 +69,13 @@ public class Map {
                 filter(i -> (i.distance(position) <= radius)).
                 collect(Collectors.toSet());
     }
+
+    public Set<Car> getNearestCars(GeoPosition position, double radius) {
+        return cars.stream().
+                filter(i -> (i.distance(position) <= radius)).
+                collect(Collectors.toSet());
+    }
+
 
     public Car addCar(GeoPosition startPosition, GeoPosition targetPosition) {
         Car car = new Car(startPosition, targetPosition, mapViewer);
@@ -86,19 +109,6 @@ public class Map {
                 min(Comparator.comparing(i -> i.distance(position)));
     }
 
-    private TileFactory createTileFactory() {
-        TileFactoryInfo info = new VirtualEarthTileFactoryInfo(VirtualEarthTileFactoryInfo.MAP);
-        DefaultTileFactory tileFactory = new DefaultTileFactory(info);
-        tileFactory.setThreadPoolSize(8);
-        return tileFactory;
-    }
 
-    private void addListeners(){
-        MouseInputListener mia = new PanMouseInputListener(mapViewer);
-        mapViewer.addMouseListener(mia);
-        mapViewer.addMouseMotionListener(mia);
-        mapViewer.addMouseWheelListener(new ZoomMouseWheelListenerCursor(mapViewer));
-        mapViewer.addKeyListener(new PanKeyListener(mapViewer));
-    }
 
 }
