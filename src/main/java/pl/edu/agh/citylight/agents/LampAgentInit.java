@@ -13,10 +13,7 @@ import jade.wrapper.StaleProxyException;
 import org.jxmapviewer.viewer.GeoPosition;
 import pl.edu.agh.citylight.mapping.Map;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Vector;
 
@@ -25,7 +22,7 @@ import java.util.Vector;
  */
 public class LampAgentInit extends Agent {
     private BufferedReader br = null;
-    private static final String FILENAME = "C:\\Users\\Adam\\Desktop\\Studia\\6Semestr\\studio projektowe\\agent-system\\src\\main\\java\\pl\\edu\\agh\\citylight\\agents\\agents.txt";
+    private static final String FILENAME = "/agents.txt";
     private ArrayList<String> cords = new ArrayList<>();
     private Vector<AID> agents = new Vector<>();
     private int _counter=0;
@@ -55,7 +52,7 @@ public class LampAgentInit extends Agent {
 
     private void setCords() {
         try {
-            br = new BufferedReader(new FileReader(FILENAME));
+            br = new BufferedReader(new InputStreamReader(LampAgentInit.class.getResourceAsStream(FILENAME)));
             String sCurrentLine;
             while ((sCurrentLine = br.readLine()) != null) {
                 System.out.println(sCurrentLine);

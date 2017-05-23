@@ -56,8 +56,8 @@ public class Map {
         streetLights.add(streetLight);
         return streetLight;
     }
-    public void removeStreetLight(StreetLight waypoint) {
-        streetLights.remove(waypoint);
+    public void removeStreetLight(StreetLight streetLight) {
+        streetLights.remove(streetLight);
     }
     public Optional<StreetLight> getNearestStreetLight(GeoPosition position) {
         return streetLights.stream().
@@ -81,6 +81,9 @@ public class Map {
         Car car = new Car(startPosition, targetPosition, mapViewer);
         cars.add(car);
         return car;
+    }
+    public void removeCar(Car car) {
+        cars.remove(car);
     }
     public void moveCars() {
         cars.forEach(Car::move);

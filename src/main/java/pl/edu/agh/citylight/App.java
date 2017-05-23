@@ -12,10 +12,12 @@ import pl.edu.agh.citylight.agents.LampAgentInit;
 import pl.edu.agh.citylight.mapping.Map;
 import pl.edu.agh.citylight.mapping.adapters.CarAdapter;
 import pl.edu.agh.citylight.mapping.adapters.EchoAdapter;
+import pl.edu.agh.citylight.mapping.adapters.StreetLightAdapter;
 
 import javax.swing.*;
 import javax.swing.Timer;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.util.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -31,18 +33,18 @@ import static java.awt.event.MouseEvent.BUTTON3;
 
 public class App {
     private JXMapViewer mapViewer;
-    private JButton button;
+    private JButton startButton;
+    private JButton switchButton;
     private Map map;
 
 
 
     //intersection simulation parameters
-    private static GeoPosition car1StartPos = new GeoPosition(50.032651998280635, 20.011188983917236);
-    private static GeoPosition car1EndPos = new GeoPosition(50.036194190130736, 20.011789798736572);
-    private static GeoPosition car2StartPos = new GeoPosition(50.036021910580374, 20.007508993148804);
-    private static GeoPosition car2EndPos = new GeoPosition(50.03358925734411, 20.01459002494812);
     private static GeoPosition defaultPosition = new GeoPosition(50.03458,20.01169);
 
+    //listeners for adding and removing objects
+    private static StreetLightAdapter streetLightAdapter;
+    private static CarAdapter carAdapter;
 
     public static final double LAMPRANGE = 60.0;
 
@@ -78,18 +80,27 @@ public class App {
     private void setUpWindow() {
         JFrame frame = new JFrame("CityLight");
         frame.setLayout(new BorderLayout());
-        button = new JButton("Start");
-        frame.add(button, BorderLayout.SOUTH);
+        JPanel controlPanel = new JPanel();
+        controlPanel.setLayout(new FlowLayout());
+        startButton = new JButton("Start");
+        switchButton = new JButton("Samochody");
+        controlPanel.add(startButton);
+        controlPanel.add(switchButton);
         frame.add(mapViewer);
+        frame.add(controlPanel, BorderLayout.SOUTH);
         frame.setSize(800, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }
 
     private void addListeners() {
+        streetLightAdapter = new StreetLightAdapter(map);
+        carAdapter = new CarAdapter(map);
         mapViewer.addMouseListener(new EchoAdapter(map));
-        mapViewer.addMouseListener(new CarAdapter(map, defaultPosition));
-        button.addActionListener(actionEvent -> startSimulation());
+        mapViewer.addMouseListener(streetLightAdapter);
+        startButton.addActionListener(actionEvent -> startSimulation());
+        switchButton.setActionCommand("cars");
+        switchButton.addActionListener(this::switchAdapters);
     }
 
     private void startSimulation() {
@@ -98,5 +109,20 @@ public class App {
             map.repaint();
         });
         timer.start();
+    }
+
+    private void switchAdapters(ActionEvent e) {
+        JButton sourceButton = (JButton) e.getSource();
+        if (e.getActionCommand().equals("cars")) {
+            mapViewer.removeMouseListener(streetLightAdapter);
+            mapViewer.addMouseListener(carAdapter);
+            sourceButton.setText("Latarnie");
+            sourceButton.setActionCommand("streetLights");
+        } else {
+            mapViewer.removeMouseListener(carAdapter);
+            mapViewer.addMouseListener(streetLightAdapter);
+            sourceButton.setText("Samochody");
+            sourceButton.setActionCommand("cars");
+        }
     }
 }

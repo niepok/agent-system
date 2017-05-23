@@ -29,8 +29,7 @@ public class StreetLightAdapter extends MouseAdapter {
             map.addStreetLight(position,null);
         }
         else if (mouseButton == BUTTON3) {
-            Optional<StreetLight> nearestStreetLight = map.getNearestStreetLight(position);
-            nearestStreetLight.ifPresent(map::removeStreetLight);
+            map.getNearestStreetLight(position).ifPresent(map::removeStreetLight);
         }
         map.repaint();
     }
