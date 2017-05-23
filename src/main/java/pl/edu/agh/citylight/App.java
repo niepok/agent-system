@@ -13,6 +13,7 @@ import pl.edu.agh.citylight.mapping.Map;
 import pl.edu.agh.citylight.mapping.StreetLight;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,32 +22,49 @@ import java.awt.event.MouseEvent;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Optional;
-import java.util.Vector;
+import java.util.*;
 
 import static java.awt.event.MouseEvent.BUTTON1;
 import static java.awt.event.MouseEvent.BUTTON3;
 
 public class App {
-    JFrame frame;
-    JXMapViewer mapViewer;
-    Map map;
-    private static Vector lampMasters = new Vector();
-
     private JXMapViewer mapViewer;
     private JButton button;
     private Map map;
     private Timer timer;
     private Car car;
+    private static Vector lampMasters = new Vector();
+    //private static HashMap<String, Set<StreetLight>> lampsMasterssss = new HashMap<>();
+    public static final double LAMPRANGE = 25.0;
+
+    //speed parameters
+    private static double timerPeriod = 25.0;
+    private static double latInc = 0.00001;
+    private static double lonInc = 0.00001;
+
 
     public static void main(String[] args) {
         GeoPosition defaultPosition = new GeoPosition(50.0625,19.9388); //Krakow
         Map map = new Map(defaultPosition);
         App window = new App(map);
+
+        Profile p = new ProfileImpl(true);
+        ContainerController cc = jade.core.Runtime.instance().createMainContainer(p);
+        AgentController ac;
+        for(int i=0; i<5;i++) {
+            try {
+                map.addStreetLight(new GeoPosition(50.0675+i*0.005, 19.9438+i*0.005), new AID("lamp"+i, AID.ISLOCALNAME));
+                Object[] argss = {"5",map,map.getLampList().get(i)};
+                ac = cc.createNewAgent("lamp"+i, "pl.edu.agh.citylight.agents.LampAgent2", argss);
+                ac.start();
+            } catch (StaleProxyException e) {
+                e.printStackTrace();
+            }
+        }
         window.addListeners();
-        window.timer = new Timer(25, actionEvent -> {
-            double lat = window.car.getPosition().getLatitude() + 0.000005;
-            double lon = window.car.getPosition().getLongitude() + 0.000005;
+        window.timer = new Timer((int) timerPeriod, actionEvent -> {
+            double lat = window.car.getPosition().getLatitude() + latInc;
+            double lon = window.car.getPosition().getLongitude() + lonInc;
             window.car.setPosition(new GeoPosition(lat, lon));
             map.repaint();
         });
@@ -71,28 +89,13 @@ public class App {
 
     private void addListeners() {
         mapViewer.addMouseListener(new MouseAdapter() {
-
-
-        Profile p = new ProfileImpl(true);
-        ContainerController cc = jade.core.Runtime.instance().createMainContainer(p);
-        Object[] argss = {1000,1,5,map};
-        AgentController ac;
-            try {
-                ac = cc.createNewAgent("master1", "agents.LampMasterAgent", argss);
-                ac.start();
-                lampMasters.add(new AID("master1", AID.ISLOCALNAME));
-            } catch (StaleProxyException e) {
-                e.printStackTrace();
-            }
-
-        window.mapViewer.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
                 int mouseButton = mouseEvent.getButton();
                 Point point = mouseEvent.getPoint();
                 GeoPosition position = mapViewer.convertPointToGeoPosition(point);
                 if (mouseButton == BUTTON1) {
-                    map.addStreetLight(position);
+                    map.addStreetLight(position,null);
                 }
                 else if (mouseButton == BUTTON3) {
                     Optional<StreetLight> nearestStreetLight = map.getNearestStreetLight(position);

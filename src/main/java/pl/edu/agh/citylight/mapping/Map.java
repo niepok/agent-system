@@ -1,5 +1,6 @@
 package pl.edu.agh.citylight.mapping;
 
+import jade.core.AID;
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.VirtualEarthTileFactoryInfo;
 import org.jxmapviewer.input.PanKeyListener;
@@ -10,13 +11,12 @@ import org.jxmapviewer.viewer.*;
 
 import javax.swing.event.MouseInputListener;
 import java.awt.*;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Map {
     private JXMapViewer mapViewer = new JXMapViewer();
+    private ArrayList<StreetLight> lampList = new ArrayList<>();
     private Set<StreetLight> streetLights = new HashSet<>();
     private Set<Car> cars = new HashSet<>();
     private WaypointPainter<Waypoint2D> streetLightPainter = new WaypointPainter<>();
@@ -50,8 +50,9 @@ public class Map {
         mapViewer.addKeyListener(new PanKeyListener(mapViewer));
     }
 
-    public StreetLight addStreetLight(GeoPosition position) {
-        StreetLight streetLight = new StreetLight(position, mapViewer);
+    public StreetLight addStreetLight(GeoPosition position, AID agent) {
+        StreetLight streetLight = new StreetLight(position, mapViewer, agent);
+        lampList.add(streetLight);
         streetLights.add(streetLight);
         return streetLight;
     }
@@ -71,11 +72,6 @@ public class Map {
                 min(Comparator.comparing(i -> i.distance(position)));
     }
 
-    public Optional<Car> getNearestCar(GeoPosition position) {
-        return cars.stream().
-                min(Comparator.comparing(i -> i.distance(position)));
-    }
-
     public Optional<Car> getNearestCar(GeoPosition position, double maxDistance) {
         Optional<Car> car = getNearestCar(position);
         if(car.isPresent() && car.get().distance(position) > maxDistance) {
@@ -91,4 +87,20 @@ public class Map {
         Toolkit.getDefaultToolkit().sync();
     }
 
+    public ArrayList<StreetLight> getLampList() {
+        return lampList;
+    }
+
+    private Optional<Car> getNearestCar(GeoPosition position) {
+        return cars.stream().
+                min(Comparator.comparing(i -> i.distance(position)));
+    }
+
+    public Set<StreetLight> getStreetLights(GeoPosition position, double radius){
+        return streetLights.stream().filter(i->(i.distance(position)<=radius)).collect(Collectors.toSet());
+    }
+
+    public Set<Car> getNearestCars(GeoPosition position, double maxDistance){
+        return cars.stream().filter(i->(i.distance(position)<=maxDistance)).collect(Collectors.toSet());
+    }
 }

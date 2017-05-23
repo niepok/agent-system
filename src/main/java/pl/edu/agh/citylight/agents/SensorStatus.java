@@ -6,6 +6,7 @@ package pl.edu.agh.citylight.agents;
 public enum SensorStatus {
     WAITING,
     CAR_DETECTED,
+    CARS_DETECTED,
     HOLDING,
     SCANNING,
     NO_MORE_CARS
