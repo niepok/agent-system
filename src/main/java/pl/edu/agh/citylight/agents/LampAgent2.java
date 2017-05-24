@@ -101,7 +101,8 @@ public class LampAgent2 extends Agent {
         protected void onTick() {
             if(sensorStatus==SensorStatus.SCANNING || sensorStatus==SensorStatus.WAITING){
                 //System.out.println(getAID().getName() +" "+sensorStatus+ " Checking if car is approaching");
-                nearestCars = map.getNearestCars(position.getPosition(), LAMPRANGE);
+                if(neighbourLamps.size()==2) nearestCars = map.getNearestCars(position.getPosition(), 1.5*LAMPRANGE);
+                else nearestCars = map.getNearestCars(position.getPosition(), LAMPRANGE);
                 if(nearestCars.size()>0) {
                     System.out.println(getAID().getName() + " " + sensorStatus + " found car nearby: " + nearestCars.size());
                     for (Car car : nearestCars) {

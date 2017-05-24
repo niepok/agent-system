@@ -46,7 +46,7 @@ public class App {
     private static StreetLightAdapter streetLightAdapter;
     private static CarAdapter carAdapter;
 
-    public static final double LAMPRANGE = 60.0;
+    public static final double LAMPRANGE = 55.5;
 
     //speed parameters
     private static double timerPeriod = 25.0;
