@@ -12,10 +12,6 @@ public class MobileWaypoint extends Waypoint2D {
     private Vector2D deltaPosition;
     private double divider;
 
-    public void setDivider(double divider) {
-        this.divider = divider;
-    }
-
     public double getSpeed() {
         return speed;
     }
@@ -25,15 +21,12 @@ public class MobileWaypoint extends Waypoint2D {
         return getPosition();
     }
 
-    MobileWaypoint(GeoPosition startPosition, GeoPosition targetPosition, JXMapViewer mapViewer) {
-        this(startPosition, mapViewer);
-        this.targetPosition = targetPosition;
-        this.deltaPosition = calculateDelta(startPosition, targetPosition);
-    }
-
-    private MobileWaypoint(GeoPosition startPosition, JXMapViewer mapViewer) {
+    MobileWaypoint(GeoPosition startPosition, GeoPosition targetPosition, JXMapViewer mapViewer, double divider) {
         super(startPosition, mapViewer);
         this.mapViewer = mapViewer;
+        this.divider = divider;
+        this.targetPosition = targetPosition;
+        this.deltaPosition = calculateDelta(startPosition, targetPosition);
     }
 
     private Vector2D calculateDelta(GeoPosition startPosition, GeoPosition targetPosition) {

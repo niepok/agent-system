@@ -113,6 +113,7 @@ public class App {
     private void startSimulation() {
         Timer timer = new Timer((int) timerPeriod, actionEvent -> {
             map.moveCars();
+            map.movePedestrians();
             map.repaint();
         });
         timer.start();
