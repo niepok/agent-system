@@ -250,7 +250,7 @@ public class LampAgent2 extends Agent {
         protected void onTick() {
             ACLMessage pedestrianDetected = new ACLMessage(ACLMessage.REQUEST);
             pedestrianDetected.addReceiver(this.getAgent().getAID());
-            if(map.checkForPedestrians(position.getPosition(), 0.5*LAMPRANGE) && !pedestrian) {
+            if(map.getNearestPedestrian(position.getPosition(), 0.5*LAMPRANGE).isPresent() && !pedestrian) {
                 pedestrianDetected.setConversationId("pedestrian-detected");
                 myAgent.send(pedestrianDetected);
                 pedestrian=true;

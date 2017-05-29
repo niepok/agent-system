@@ -10,9 +10,8 @@ import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.viewer.GeoPosition;
 import pl.edu.agh.citylight.agents.LampAgentInit;
 import pl.edu.agh.citylight.mapping.Map;
-import pl.edu.agh.citylight.mapping.adapters.CarAdapter;
-import pl.edu.agh.citylight.mapping.adapters.EchoAdapter;
-import pl.edu.agh.citylight.mapping.adapters.StreetLightAdapter;
+import pl.edu.agh.citylight.mapping.Pedestrian;
+import pl.edu.agh.citylight.mapping.adapters.*;
 
 import javax.swing.*;
 import javax.swing.Timer;
@@ -34,7 +33,7 @@ import static java.awt.event.MouseEvent.BUTTON3;
 public class App {
     private JXMapViewer mapViewer;
     private JButton startButton;
-    private JButton switchButton;
+    private JComboBox<String> comboBox;
     private Map map;
 
 
@@ -45,6 +44,9 @@ public class App {
     //listeners for adding and removing objects
     private static StreetLightAdapter streetLightAdapter;
     private static CarAdapter carAdapter;
+    private static PedestrianAdapter pedestrianAdapter;
+    private static MouseAdapter currentAdapter;
+
 
     public static final double LAMPRANGE = 42.5;
 
@@ -77,15 +79,19 @@ public class App {
         setUpWindow();
     }
 
+    @SuppressWarnings("unchecked")
     private void setUpWindow() {
         JFrame frame = new JFrame("CityLight");
         frame.setLayout(new BorderLayout());
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new FlowLayout());
+
+        String options[] = {"Lampy", "Samochody", "Piesi"};
         startButton = new JButton("Start");
-        switchButton = new JButton("Samochody");
+        comboBox = new JComboBox(options);
+        comboBox.setSelectedIndex(0);
         controlPanel.add(startButton);
-        controlPanel.add(switchButton);
+        controlPanel.add(comboBox);
         frame.add(mapViewer);
         frame.add(controlPanel, BorderLayout.SOUTH);
         frame.setSize(800, 600);
@@ -96,11 +102,12 @@ public class App {
     private void addListeners() {
         streetLightAdapter = new StreetLightAdapter(map);
         carAdapter = new CarAdapter(map);
+        pedestrianAdapter = new PedestrianAdapter(map);
         mapViewer.addMouseListener(new EchoAdapter(map));
         mapViewer.addMouseListener(streetLightAdapter);
+        currentAdapter = streetLightAdapter;
         startButton.addActionListener(actionEvent -> startSimulation());
-        switchButton.setActionCommand("cars");
-        switchButton.addActionListener(this::switchAdapters);
+        comboBox.addActionListener(this::switchAdapters);
     }
 
     private void startSimulation() {
@@ -112,17 +119,19 @@ public class App {
     }
 
     private void switchAdapters(ActionEvent e) {
-        JButton sourceButton = (JButton) e.getSource();
-        if (e.getActionCommand().equals("cars")) {
-            mapViewer.removeMouseListener(streetLightAdapter);
-            mapViewer.addMouseListener(carAdapter);
-            sourceButton.setText("Latarnie");
-            sourceButton.setActionCommand("streetLights");
-        } else {
-            mapViewer.removeMouseListener(carAdapter);
-            mapViewer.addMouseListener(streetLightAdapter);
-            sourceButton.setText("Samochody");
-            sourceButton.setActionCommand("cars");
+        JComboBox comboBox = (JComboBox) e.getSource();
+        mapViewer.removeMouseListener(currentAdapter);
+        switch ((String)comboBox.getSelectedItem()) {
+            case "Lampy":
+                currentAdapter = streetLightAdapter;
+                break;
+            case "Samochody":
+                currentAdapter = carAdapter;
+                break;
+            case "Piesi":
+                currentAdapter = pedestrianAdapter;
+                break;
         }
+        mapViewer.addMouseListener(currentAdapter);
     }
 }

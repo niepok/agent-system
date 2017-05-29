@@ -47,6 +47,7 @@ public class LampAgentInit extends Agent {
                 e.printStackTrace();
             }
         }
+        map.repaint();
         addBehaviour(new SetNeighbours());
     }
 

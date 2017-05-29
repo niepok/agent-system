@@ -19,10 +19,12 @@ public class Map {
     private ArrayList<StreetLight> lampList = new ArrayList<>();
     private Set<StreetLight> streetLights = new HashSet<>();
     private Set<Car> cars = new HashSet<>();
+    private Set<Pedestrian> pedestrians = new HashSet<>();
     private WaypointPainter<Waypoint2D> streetLightPainter = new WaypointPainter<>();
     private WaypointPainter<Waypoint2D> carPainter = new WaypointPainter<>();
+    private WaypointPainter<Waypoint2D> pedestrianPainter = new WaypointPainter<>();
     @SuppressWarnings("unchecked")
-    private CompoundPainter<JXMapViewer> painters = new CompoundPainter<>(streetLightPainter, carPainter);
+    private CompoundPainter<JXMapViewer> painters = new CompoundPainter<>(streetLightPainter, carPainter, pedestrianPainter);
 
     public JXMapViewer getMapViewer() {
         return mapViewer;
@@ -70,11 +72,7 @@ public class Map {
                 collect(Collectors.toSet());
     }
 
-    public Set<Car> getNearestCars(GeoPosition position, double radius) {
-        return cars.stream().
-                filter(i -> (i.distance(position) <= radius)).
-                collect(Collectors.toSet());
-    }
+
 
 
     public Car addCar(GeoPosition startPosition, GeoPosition targetPosition) {
@@ -95,10 +93,42 @@ public class Map {
         }
         return car;
     }
+    public Set<Car> getNearestCars(GeoPosition position, double radius) {
+        return cars.stream().
+                filter(i -> (i.distance(position) <= radius)).
+                collect(Collectors.toSet());
+    }
+
+    public Pedestrian addPedestrian(GeoPosition startPosition, GeoPosition targetPosition) {
+        Pedestrian pedestrian = new Pedestrian(startPosition, targetPosition, mapViewer);
+        pedestrians.add(pedestrian);
+        return pedestrian;
+    }
+    public void removePedestrian(Pedestrian pedestrian) {
+        pedestrians.remove(pedestrian);
+    }
+    public void movePedestrians() {
+        pedestrians.forEach(Pedestrian::move);
+    }
+    public Optional<Pedestrian> getNearestPedestrian(GeoPosition position, double maxDistance) {
+        Optional<Pedestrian> pedestrian = getNearestPedestrian(position);
+        if(pedestrian.isPresent() && pedestrian.get().distance(position) > maxDistance) {
+            return Optional.empty();
+        }
+        return pedestrian;
+    }
+    public Set<Pedestrian> getNearestPedestrians(GeoPosition position, double radius) {
+        return pedestrians.stream().
+                filter(i -> (i.distance(position) <= radius)).
+                collect(Collectors.toSet());
+    }
+
+    
 
     public void repaint() {
         streetLightPainter.setWaypoints(streetLights);
         carPainter.setWaypoints(cars);
+        pedestrianPainter.setWaypoints(pedestrians);
         mapViewer.setOverlayPainter(painters);
         Toolkit.getDefaultToolkit().sync();
     }
@@ -109,6 +139,11 @@ public class Map {
 
     private Optional<Car> getNearestCar(GeoPosition position) {
         return cars.stream().
+                min(Comparator.comparing(i -> i.distance(position)));
+    }
+
+    private Optional<Pedestrian> getNearestPedestrian(GeoPosition position) {
+        return pedestrians.stream().
                 min(Comparator.comparing(i -> i.distance(position)));
     }
 
