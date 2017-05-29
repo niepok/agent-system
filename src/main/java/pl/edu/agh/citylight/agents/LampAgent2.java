@@ -45,6 +45,7 @@ public class LampAgent2 extends Agent {
 
     private SensorStatus sensorStatus;
     private boolean ledStatus = false;
+    private boolean pedestrian = false;
     private long carSensorPeriod;
     private boolean communicationStatus = false;
     private int carsDetected;
@@ -71,6 +72,7 @@ public class LampAgent2 extends Agent {
 
         sensorStatus = SensorStatus.WAITING;
         //behaviour init
+        //addBehaviour(new PedestrianSensor(this, 2000));
         addBehaviour(new CarSensor(this, carSensorPeriod*1000));
         addBehaviour(new Receiver());
         addBehaviour(new Sender());
@@ -79,7 +81,7 @@ public class LampAgent2 extends Agent {
 
     public void setNeighbourLamps(){
         neighbourLamps = map.getStreetLights(position.getPosition(), 2*LAMPRANGE);
-        System.out.println(getAID().getName()+" this lamp's neighbours: "+neighbourLamps.toString());
+        System.out.println(getAID().getName()+" this lamp's neighbours: "+neighbourLamps.size());
     }
     /**
      * Inner class
@@ -94,7 +96,7 @@ public class LampAgent2 extends Agent {
      * long period - sensor frequency
      */
     private class CarSensor extends TickerBehaviour {
-        public CarSensor(Agent a, long period) {
+        CarSensor(Agent a, long period) {
             super(a, period);
         }
 
@@ -211,8 +213,18 @@ public class LampAgent2 extends Agent {
                 if (!ledStatus && msg.getConversationId().equals("turn-on")) {
                     System.out.println(getAID().getName() +" "+sensorStatus+ " turned on for "+ Collections.max(receivedSignals.values()) + " by "+msg.getSender().getName());
                     ledStatus = true;
-                } else if(msg.getConversationId().equals("adjust")){
-                    System.out.println(getAID().getName()+" shinning for "+Collections.max(receivedSignals.values()));
+                } else if(msg.getConversationId().equals("adjust") && !pedestrian) {
+                    System.out.println(getAID().getName() + " shinning for " + Collections.max(receivedSignals.values()));
+                } else if(msg.getConversationId().equals("pedestrian-detected")) {
+                    System.out.println(getAID().getName() + " detected a pedestrian, shining maximum power");
+                    if (!ledStatus) ledStatus = true;
+                } else if(msg.getConversationId().equals("no-more-pedestrians")){
+                    if(!receivedSignals.isEmpty()) System.out.println(getAID().getName()+" no more pedestrians, backing lamp power to "+Collections.max(receivedSignals.values()));
+                    else {
+                        System.out.println(getAID().getName() +" "+sensorStatus+ " turned off by "+msg.getSender().getName());
+                        ledStatus = false;
+                        sensorStatus = SensorStatus.WAITING;
+                    }
                 } else if(msg.getConversationId().equals("turn-off")){
                     System.out.println(getAID().getName() +" "+sensorStatus+ " turned off by "+msg.getSender().getName());
                     ledStatus = false;
@@ -228,4 +240,25 @@ public class LampAgent2 extends Agent {
     protected void takeDown() {
         System.out.println("Lamp-agent " + getAID().getName() + " terminating.");
     }
+    /*
+    private class PedestrianSensor extends TickerBehaviour {
+        PedestrianSensor(Agent a, long period) {
+            super(a, period);
+        }
+
+        @Override
+        protected void onTick() {
+            ACLMessage pedestrianDetected = new ACLMessage(ACLMessage.REQUEST);
+            pedestrianDetected.addReceiver(this.getAgent().getAID());
+            if(map.checkForPedestrians(position.getPosition(), 0.5*LAMPRANGE) && !pedestrian) {
+                pedestrianDetected.setConversationId("pedestrian-detected");
+                myAgent.send(pedestrianDetected);
+                pedestrian=true;
+            } else if (!map.checkForPedestrian(position.getPosition(), 0.5*LAMPRANGE) && pedestrian){
+                pedestrianDetected.setConversationId("no-more-pedestrians");
+                myAgent.send(pedestrianDetected);
+                pedestrian=false;
+            }
+        }
+    }*/
 }
