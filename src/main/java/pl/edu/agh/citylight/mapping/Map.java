@@ -35,6 +35,8 @@ public class Map {
 	    mapViewer.setCenterPosition(centerPosition);
         mapViewer.setZoom(zoom);
         addListeners();
+        carPainter.setRenderer(new ImageRenderer("/car.png"));
+        pedestrianPainter.setRenderer(new ImageRenderer("/pedestrian.png"));
 	}
 
     private TileFactory createTileFactory() {
