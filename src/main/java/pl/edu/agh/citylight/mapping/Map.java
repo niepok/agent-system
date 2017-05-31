@@ -31,7 +31,15 @@ public class Map {
         return mapViewer;
     }
 
-	public Map(GeoPosition centerPosition, int zoom) {
+    public Set<Car> getCars() {
+        return cars;
+    }
+
+    public void setCars(Set<Car> cars) {
+        this.cars = cars;
+    }
+
+    public Map(GeoPosition centerPosition, int zoom) {
 	    mapViewer.setTileFactory(createTileFactory());
 	    mapViewer.setCenterPosition(centerPosition);
         mapViewer.setZoom(zoom);

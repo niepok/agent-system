@@ -19,9 +19,12 @@ public class MobileWaypoint extends Waypoint2D {
 
     private static final double THRESHOLD = 0.00005;
 
-
     public double getSpeed() {
         return speed;
+    }
+
+    public List<GeoPosition> getPath() {
+        return path;
     }
 
     GeoPosition move() {
