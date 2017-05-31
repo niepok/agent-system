@@ -12,6 +12,7 @@ import org.jxmapviewer.viewer.*;
 import javax.swing.event.MouseInputListener;
 import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class Map {
@@ -78,8 +79,8 @@ public class Map {
 
 
 
-    public Car addCar(GeoPosition startPosition, GeoPosition targetPosition) {
-        Car car = new Car(startPosition, targetPosition, mapViewer);
+    public Car addCar(List<GeoPosition> path) {
+        Car car = new Car(path, mapViewer);
         cars.add(car);
         return car;
     }
@@ -102,8 +103,8 @@ public class Map {
                 collect(Collectors.toSet());
     }
 
-    public Pedestrian addPedestrian(GeoPosition startPosition, GeoPosition targetPosition) {
-        Pedestrian pedestrian = new Pedestrian(startPosition, targetPosition, mapViewer);
+    public Pedestrian addPedestrian(List<GeoPosition> path) {
+        Pedestrian pedestrian = new Pedestrian(path, mapViewer);
         pedestrians.add(pedestrian);
         return pedestrian;
     }

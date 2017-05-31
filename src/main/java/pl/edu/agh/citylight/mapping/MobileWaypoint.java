@@ -5,28 +5,48 @@ import org.jxmapviewer.viewer.GeoPosition;
 import pl.edu.agh.citylight.App;
 
 import java.awt.geom.Point2D;
+import java.util.Iterator;
+import java.util.List;
 
 public class MobileWaypoint extends Waypoint2D {
-    private double speed;
-    private GeoPosition targetPosition;
     private JXMapViewer mapViewer;
+    private double speed;
+    private List<GeoPosition> path;
+    private Iterator<GeoPosition> positionIterator;
+    private GeoPosition segmentEnd;
+
     private Vector2D deltaPosition;
+
+    private static final double THRESHOLD = 0.00005;
+
 
     public double getSpeed() {
         return speed;
     }
 
     GeoPosition move() {
-        setPosition(deltaPosition.translateGeoPosition(getPosition()));
-        return getPosition();
+        GeoPosition currentPosition = getPosition();
+        setPosition(deltaPosition.translateGeoPosition(currentPosition));
+        if (equals(currentPosition, segmentEnd)) {
+            if (positionIterator.hasNext()) {
+                segmentEnd = positionIterator.next();
+                deltaPosition = calculateDelta(currentPosition, segmentEnd);
+            } else {
+                //TODO
+            }
+        }
+        return currentPosition;
     }
 
-    MobileWaypoint(GeoPosition startPosition, GeoPosition targetPosition, JXMapViewer mapViewer, double speed) {
-        super(startPosition, mapViewer);
+    MobileWaypoint(List<GeoPosition> path, JXMapViewer mapViewer, double speed) {
+        super(path.get(0), mapViewer);
         this.mapViewer = mapViewer;
         this.speed = speed;
-        this.targetPosition = targetPosition;
-        this.deltaPosition = calculateDelta(startPosition, targetPosition);
+        this.path = path;
+        positionIterator = path.iterator();
+        GeoPosition pathStart = positionIterator.next();
+        segmentEnd = positionIterator.next();
+        this.deltaPosition = calculateDelta(pathStart, segmentEnd);
     }
 
     private Vector2D calculateDelta(GeoPosition startPosition, GeoPosition targetPosition) {
@@ -38,6 +58,15 @@ public class MobileWaypoint extends Waypoint2D {
         double dx = (speed * x) / (s * App.framesPerSecond);
         double dy = (speed * y) / (s * App.framesPerSecond);
         return new Vector2D(dx, dy);
+    }
+
+    private boolean equals(GeoPosition first, GeoPosition second) {
+        return equals(first.getLatitude(), second.getLatitude()) &&
+                equals(first.getLongitude(), second.getLongitude());
+    }
+
+    private boolean equals(double first, double second) {
+        return Math.abs(first - second) < THRESHOLD;
     }
 
     private class Vector2D {
