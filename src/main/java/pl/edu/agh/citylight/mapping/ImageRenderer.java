@@ -24,7 +24,7 @@ public class ImageRenderer implements WaypointRenderer<Waypoint2D>{
         if(this.image != null) {
             Point2D point = mapViewer.getTileFactory().geoToPixel(waypoint.getPosition(), mapViewer.getZoom());
             int x = (int)point.getX() - this.image.getWidth() / 2;
-            int y = (int)point.getY() - this.image.getHeight();
+            int y = (int)point.getY() - this.image.getHeight() / 2;
             graphics2D.drawImage(this.image, x, y, null);
         }
     }

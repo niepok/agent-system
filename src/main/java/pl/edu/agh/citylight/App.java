@@ -36,10 +36,8 @@ public class App {
     private JComboBox<String> comboBox;
     private Map map;
 
-
-
     //intersection simulation parameters
-    private static GeoPosition defaultPosition = new GeoPosition(50.03458,20.01169);
+    static GeoPosition defaultPosition = new GeoPosition(50.03458,20.01169);
 
     //listeners for adding and removing objects
     private static StreetLightAdapter streetLightAdapter;
@@ -51,9 +49,7 @@ public class App {
     public static final double LAMPRANGE = 42.5;
 
     //speed parameters
-    private static double timerPeriod = 25.0;
-    private static double latInc = 0.00001;
-    private static double lonInc = 0.00001;
+    public static double framesPerSecond = 60;
 
 
     public static void main(String[] args) {
@@ -111,7 +107,8 @@ public class App {
     }
 
     private void startSimulation() {
-        Timer timer = new Timer((int) timerPeriod, actionEvent -> {
+        int timerPeriod = (int) (framesPerSecond / 1000);
+        Timer timer = new Timer(timerPeriod, actionEvent -> {
             map.moveCars();
             map.movePedestrians();
             map.repaint();

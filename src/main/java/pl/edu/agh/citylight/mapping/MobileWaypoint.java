@@ -2,15 +2,15 @@ package pl.edu.agh.citylight.mapping;
 
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.viewer.GeoPosition;
+import pl.edu.agh.citylight.App;
 
 import java.awt.geom.Point2D;
 
 public class MobileWaypoint extends Waypoint2D {
-    private double speed = 5.0;
+    private double speed;
     private GeoPosition targetPosition;
     private JXMapViewer mapViewer;
     private Vector2D deltaPosition;
-    private double divider;
 
     public double getSpeed() {
         return speed;
@@ -21,10 +21,10 @@ public class MobileWaypoint extends Waypoint2D {
         return getPosition();
     }
 
-    MobileWaypoint(GeoPosition startPosition, GeoPosition targetPosition, JXMapViewer mapViewer, double divider) {
+    MobileWaypoint(GeoPosition startPosition, GeoPosition targetPosition, JXMapViewer mapViewer, double speed) {
         super(startPosition, mapViewer);
         this.mapViewer = mapViewer;
-        this.divider = divider;
+        this.speed = speed;
         this.targetPosition = targetPosition;
         this.deltaPosition = calculateDelta(startPosition, targetPosition);
     }
@@ -32,9 +32,12 @@ public class MobileWaypoint extends Waypoint2D {
     private Vector2D calculateDelta(GeoPosition startPosition, GeoPosition targetPosition) {
         Point2D start = mapViewer.convertGeoPositionToPoint(startPosition);
         Point2D end = mapViewer.convertGeoPositionToPoint(targetPosition);
-        double x = (end.getX() - start.getX()) / divider;
-        double y = (end.getY() - start.getY()) / divider;
-        return new Vector2D(x, y);
+        double s = start.distance(end);
+        double x = end.getX() - start.getX();
+        double y = end.getY() - start.getY();
+        double dx = (speed * x) / (s * App.framesPerSecond);
+        double dy = (speed * y) / (s * App.framesPerSecond);
+        return new Vector2D(dx, dy);
     }
 
     private class Vector2D {
