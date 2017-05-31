@@ -8,6 +8,6 @@ import java.util.List;
 
 public class Car extends MobileWaypoint {
     Car(List<GeoPosition> path, JXMapViewer mapViewer) {
-        super(path, mapViewer, 100);
+        super(path, mapViewer, 10);
     }
 }

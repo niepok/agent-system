@@ -38,7 +38,7 @@ public class LampAgentInit extends Agent {
             try {
                 String[] _cords = c.split(";");
                 map.addStreetLight(new GeoPosition(Double.parseDouble(_cords[0]), Double.parseDouble(_cords[1])), new AID("lamp"+_counter, AID.ISLOCALNAME));
-                Object[] argss = {"5",map,map.getLampList().get(_counter)};
+                Object[] argss = {"2",map,map.getLampList().get(_counter)};
                 ac = cc.createNewAgent("lamp"+_counter, "pl.edu.agh.citylight.agents.LampAgent2", argss);
                 ac.start();
                 agents.add(new AID("lamp"+_counter, AID.ISLOCALNAME));

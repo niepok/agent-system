@@ -7,6 +7,6 @@ import java.util.List;
 
 public class Pedestrian extends MobileWaypoint {
     Pedestrian(List<GeoPosition> path, JXMapViewer mapViewer) {
-        super(path, mapViewer, 25);
+        super(path, mapViewer, 2.5);
     }
 }
