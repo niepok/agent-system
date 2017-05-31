@@ -6,6 +6,7 @@ import jade.core.behaviours.*;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import pl.edu.agh.citylight.mapping.Car;
+import pl.edu.agh.citylight.mapping.Intensity;
 import pl.edu.agh.citylight.mapping.Map;
 import pl.edu.agh.citylight.mapping.StreetLight;
 
@@ -37,7 +38,7 @@ import static pl.edu.agh.citylight.App.LAMPRANGE;
 @SuppressWarnings("Duplicates")
 public class LampAgent2 extends Agent {
 
-    private StreetLight position;
+    private StreetLight lampObject;
     private Car nearestCar;
     private Set<Car> nearestCars;
     private Map map;
@@ -66,13 +67,13 @@ public class LampAgent2 extends Agent {
             carSensorPeriod = Long.parseLong((String) args[0]);
             //System.out.println(getAID().getName()+" This lamp's period: "+carSensorPeriod+" sec");
             map = (Map) args[1];
-            position = (StreetLight) args[2];
+            lampObject = (StreetLight) args[2];
         }
 
 
         sensorStatus = SensorStatus.WAITING;
         //behaviour init
-        //addBehaviour(new PedestrianSensor(this, 2000));
+        addBehaviour(new PedestrianSensor(this, 2000));
         addBehaviour(new CarSensor(this, carSensorPeriod*1000));
         addBehaviour(new Receiver());
         addBehaviour(new Sender());
@@ -80,7 +81,7 @@ public class LampAgent2 extends Agent {
     }
 
     public void setNeighbourLamps(){
-        neighbourLamps = map.getStreetLights(position.getPosition(), 2*LAMPRANGE);
+        neighbourLamps = map.getStreetLights(lampObject.getPosition(), 2*LAMPRANGE);
         System.out.println(getAID().getName()+" this lamp's neighbours: "+neighbourLamps.size());
     }
     /**
@@ -103,8 +104,8 @@ public class LampAgent2 extends Agent {
         protected void onTick() {
             if(sensorStatus==SensorStatus.SCANNING || sensorStatus==SensorStatus.WAITING){
                 //System.out.println(getAID().getName() +" "+sensorStatus+ " Checking if car is approaching");
-                if(neighbourLamps.size()==2) nearestCars = map.getNearestCars(position.getPosition(), 1.5*LAMPRANGE);
-                else nearestCars = map.getNearestCars(position.getPosition(), LAMPRANGE);
+                if(neighbourLamps.size()==2) nearestCars = map.getNearestCars(lampObject.getPosition(), 1.5*LAMPRANGE);
+                else nearestCars = map.getNearestCars(lampObject.getPosition(), LAMPRANGE);
                 if(nearestCars.size()>0) {
                     System.out.println(getAID().getName() + " " + sensorStatus + " found car nearby: " + nearestCars.size());
                     for (Car car : nearestCars) {
@@ -212,26 +213,41 @@ public class LampAgent2 extends Agent {
             if (msg != null) {
                 if (!ledStatus && msg.getConversationId().equals("turn-on")) {
                     System.out.println(getAID().getName() +" "+sensorStatus+ " turned on for "+ Collections.max(receivedSignals.values()) + " by "+msg.getSender().getName());
+                    lampObject.setLightIntensity(ledIntensity(Collections.max(receivedSignals.values())));
                     ledStatus = true;
                 } else if(msg.getConversationId().equals("adjust") && !pedestrian) {
                     System.out.println(getAID().getName() + " shinning for " + Collections.max(receivedSignals.values()));
+                    lampObject.setLightIntensity(ledIntensity(Collections.max(receivedSignals.values())));
                 } else if(msg.getConversationId().equals("pedestrian-detected")) {
                     System.out.println(getAID().getName() + " detected a pedestrian, shining maximum power");
+                    lampObject.setLightIntensity(Intensity.HIGH);
                     if (!ledStatus) ledStatus = true;
                 } else if(msg.getConversationId().equals("no-more-pedestrians")){
-                    if(!receivedSignals.isEmpty()) System.out.println(getAID().getName()+" no more pedestrians, backing lamp power to "+Collections.max(receivedSignals.values()));
+                    if(!receivedSignals.isEmpty()){
+                        System.out.println(getAID().getName()+" no more pedestrians, backing lamp power to "+Collections.max(receivedSignals.values()));
+                        lampObject.setLightIntensity(ledIntensity(Collections.max(receivedSignals.values())));
+                    }
                     else {
                         System.out.println(getAID().getName() +" "+sensorStatus+ " turned off by "+msg.getSender().getName());
+                        lampObject.setLightIntensity(Intensity.OFF);
                         ledStatus = false;
                         sensorStatus = SensorStatus.WAITING;
                     }
-                } else if(msg.getConversationId().equals("turn-off")){
+                } else if(msg.getConversationId().equals("turn-off") &&!pedestrian){
                     System.out.println(getAID().getName() +" "+sensorStatus+ " turned off by "+msg.getSender().getName());
+                    lampObject.setLightIntensity(Intensity.OFF);
                     ledStatus = false;
                     sensorStatus = SensorStatus.WAITING;
                 }
             }
         }
+    }
+
+    private Intensity ledIntensity(int amount){
+        if(amount>6) return Intensity.HIGH;
+        else if (amount>0 && amount<=3) return Intensity.LOW;
+        else if (amount>3 && amount<=6) return Intensity.MEDIUM;
+        else return Intensity.OFF;
     }
 
     /**
@@ -240,7 +256,7 @@ public class LampAgent2 extends Agent {
     protected void takeDown() {
         System.out.println("Lamp-agent " + getAID().getName() + " terminating.");
     }
-    /*
+
     private class PedestrianSensor extends TickerBehaviour {
         PedestrianSensor(Agent a, long period) {
             super(a, period);
@@ -250,15 +266,15 @@ public class LampAgent2 extends Agent {
         protected void onTick() {
             ACLMessage pedestrianDetected = new ACLMessage(ACLMessage.REQUEST);
             pedestrianDetected.addReceiver(this.getAgent().getAID());
-            if(map.getNearestPedestrian(position.getPosition(), 0.5*LAMPRANGE).isPresent() && !pedestrian) {
+            if(map.getNearestPedestrian(lampObject.getPosition(), 0.75*LAMPRANGE).isPresent() && !pedestrian) {
                 pedestrianDetected.setConversationId("pedestrian-detected");
                 myAgent.send(pedestrianDetected);
                 pedestrian=true;
-            } else if (!map.checkForPedestrian(position.getPosition(), 0.5*LAMPRANGE) && pedestrian){
+            } else if (!map.getNearestPedestrian(lampObject.getPosition(), 0.75*LAMPRANGE).isPresent() && pedestrian){
                 pedestrianDetected.setConversationId("no-more-pedestrians");
                 myAgent.send(pedestrianDetected);
                 pedestrian=false;
             }
         }
-    }*/
+    }
 }
