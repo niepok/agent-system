@@ -94,7 +94,7 @@ public class App {
         controlPanel.add(comboBox);
         frame.add(mapViewer);
         frame.add(controlPanel, BorderLayout.SOUTH);
-        frame.setSize(800, 600);
+        frame.setSize(1280, 720);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }
@@ -103,7 +103,7 @@ public class App {
         streetLightAdapter = new StreetLightAdapter(map);
         carAdapter = new CarAdapter(map);
         pedestrianAdapter = new PedestrianAdapter(map);
-        mapViewer.addMouseListener(new EchoAdapter(map));
+        //mapViewer.addMouseListener(new EchoAdapter(map));
         mapViewer.addMouseListener(streetLightAdapter);
         currentAdapter = streetLightAdapter;
         startButton.addActionListener(actionEvent -> startSimulation());

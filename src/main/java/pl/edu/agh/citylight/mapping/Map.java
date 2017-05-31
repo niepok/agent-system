@@ -20,7 +20,7 @@ public class Map {
     private Set<StreetLight> streetLights = new HashSet<>();
     private Set<Car> cars = new HashSet<>();
     private Set<Pedestrian> pedestrians = new HashSet<>();
-    private WaypointPainter<Waypoint2D> streetLightPainter = new WaypointPainter<>();
+    private WaypointPainter<StreetLight> streetLightPainter = new WaypointPainter<>();
     private WaypointPainter<Waypoint2D> carPainter = new WaypointPainter<>();
     private WaypointPainter<Waypoint2D> pedestrianPainter = new WaypointPainter<>();
     @SuppressWarnings("unchecked")
@@ -37,6 +37,7 @@ public class Map {
         addListeners();
         carPainter.setRenderer(new ImageRenderer("/car.png"));
         pedestrianPainter.setRenderer(new ImageRenderer("/pedestrian.png"));
+        streetLightPainter.setRenderer(new StreetLightRenderer());
 	}
 
     private TileFactory createTileFactory() {
