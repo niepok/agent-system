@@ -2,9 +2,6 @@ package pl.edu.agh.citylight.agents;
 
 import jade.core.AID;
 import jade.core.Agent;
-import jade.core.Profile;
-import jade.core.ProfileImpl;
-import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.wrapper.AgentController;
@@ -56,7 +53,6 @@ public class LampAgentInit extends Agent {
             br = new BufferedReader(new InputStreamReader(LampAgentInit.class.getResourceAsStream(FILENAME)));
             String sCurrentLine;
             while ((sCurrentLine = br.readLine()) != null) {
-                System.out.println(sCurrentLine);
                 cords.add(sCurrentLine);
             }
         } catch (IOException e) {
