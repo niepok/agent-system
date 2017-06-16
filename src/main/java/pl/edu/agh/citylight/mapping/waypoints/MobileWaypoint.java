@@ -1,4 +1,4 @@
-package pl.edu.agh.citylight.mapping;
+package pl.edu.agh.citylight.mapping.waypoints;
 
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.viewer.GeoPosition;
@@ -8,8 +8,7 @@ import java.awt.geom.Point2D;
 import java.util.Iterator;
 import java.util.List;
 
-public class MobileWaypoint extends Waypoint2D {
-    private JXMapViewer mapViewer;
+abstract class MobileWaypoint extends Waypoint2D {
     private double speed;
     private List<GeoPosition> path;
     private Iterator<GeoPosition> positionIterator;
@@ -27,7 +26,7 @@ public class MobileWaypoint extends Waypoint2D {
         return path;
     }
 
-    GeoPosition move() {
+    public void move() {
         GeoPosition currentPosition = getPosition();
         setPosition(deltaPosition.translateGeoPosition(currentPosition));
         if (equals(currentPosition, segmentEnd)) {
@@ -38,12 +37,10 @@ public class MobileWaypoint extends Waypoint2D {
                 //TODO
             }
         }
-        return currentPosition;
     }
 
     MobileWaypoint(List<GeoPosition> path, JXMapViewer mapViewer, double speed) {
         super(path.get(0), mapViewer);
-        this.mapViewer = mapViewer;
         this.speed = speed;
         this.path = path;
         positionIterator = path.iterator();
@@ -86,7 +83,7 @@ public class MobileWaypoint extends Waypoint2D {
             return mapViewer.convertPointToGeoPosition(translate(point));
         }
 
-        Point2D translate(Point2D point) {
+        private Point2D translate(Point2D point) {
             point.setLocation(point.getX() + x, point.getY() + y);
             return point;
         }

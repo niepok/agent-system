@@ -2,7 +2,6 @@ package pl.edu.agh.citylight;
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
-import jade.core.AID;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.wrapper.AgentController;
@@ -10,10 +9,8 @@ import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.viewer.GeoPosition;
-import pl.edu.agh.citylight.agents.LampAgentInit;
-import pl.edu.agh.citylight.mapping.Car;
+import pl.edu.agh.citylight.mapping.waypoints.Car;
 import pl.edu.agh.citylight.mapping.Map;
-import pl.edu.agh.citylight.mapping.Pedestrian;
 import pl.edu.agh.citylight.mapping.adapters.*;
 
 import javax.swing.*;
@@ -24,21 +21,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.time.LocalTime;
 import java.util.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static java.awt.event.MouseEvent.BUTTON1;
-import static java.awt.event.MouseEvent.BUTTON3;
 
 public class App {
     private JXMapViewer mapViewer;

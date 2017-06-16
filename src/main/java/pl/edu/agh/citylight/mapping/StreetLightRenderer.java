@@ -2,12 +2,10 @@ package pl.edu.agh.citylight.mapping;
 
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.viewer.WaypointRenderer;
+import pl.edu.agh.citylight.mapping.waypoints.StreetLight;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
-import java.awt.image.BufferedImage;
 
 public class StreetLightRenderer implements WaypointRenderer<StreetLight>{
     private static final int LAMP_WIDTH = 15;

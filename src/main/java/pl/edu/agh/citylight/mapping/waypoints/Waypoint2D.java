@@ -1,4 +1,4 @@
-package pl.edu.agh.citylight.mapping;
+package pl.edu.agh.citylight.mapping.waypoints;
 
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.viewer.DefaultWaypoint;
@@ -6,8 +6,8 @@ import org.jxmapviewer.viewer.GeoPosition;
 
 import java.awt.geom.Point2D;
 
-public class Waypoint2D extends DefaultWaypoint {
-    private JXMapViewer mapViewer;
+public abstract class Waypoint2D extends DefaultWaypoint {
+    protected JXMapViewer mapViewer;
 
     Waypoint2D(GeoPosition position, JXMapViewer mapViewer) {
         super(position);
