@@ -15,10 +15,6 @@ import java.util.*;
 
 import static pl.edu.agh.citylight.App.LAMPRANGE;
 
-/**
- * Created by Adam on 09.05.2017.
- */
-@SuppressWarnings("Duplicates")
 public class LampAgent2 extends Agent {
 
     private StreetLight lampObject;
@@ -35,10 +31,7 @@ public class LampAgent2 extends Agent {
     private int carsDetected;
     private java.util.Map<AID, Integer> receivedSignals = new HashMap<>();
 
-    /**
-     * Required method
-     * it sets up the lampagent with period for movemnt sensor and master's AID
-     */
+
     protected void setup(){
         Object[] args = getArguments();
         if (args != null && args.length > 0) {
@@ -114,7 +107,6 @@ public class LampAgent2 extends Agent {
                     noMoreCars.setSender(this.getAgent().getAID());
                     myAgent.send(noMoreCars);
                     sensorStatus=SensorStatus.WAITING;
-
                     break;
             }
         }

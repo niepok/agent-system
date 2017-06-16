@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 public class Map {
     private JXMapViewer mapViewer = new JXMapViewer();
-    private ArrayList<StreetLight> lampList = new ArrayList<>();
     private Set<StreetLight> streetLights = new HashSet<>();
     private Set<Car> cars = new HashSet<>();
     private Set<Pedestrian> pedestrians = new HashSet<>();
@@ -66,7 +65,6 @@ public class Map {
 
     public StreetLight addStreetLight(GeoPosition position, AID agent) {
         StreetLight streetLight = new StreetLight(position, mapViewer, agent);
-        lampList.add(streetLight);
         streetLights.add(streetLight);
         return streetLight;
     }
@@ -83,9 +81,6 @@ public class Map {
                 filter(i -> (i.distance(position) <= radius)).
                 collect(Collectors.toSet());
     }
-
-
-
 
     public Car addCar(List<GeoPosition> path) {
         Car car = new Car(path, mapViewer);
@@ -135,18 +130,12 @@ public class Map {
                 collect(Collectors.toSet());
     }
 
-    
-
     public void repaint() {
         streetLightPainter.setWaypoints(streetLights);
         carPainter.setWaypoints(cars);
         pedestrianPainter.setWaypoints(pedestrians);
         mapViewer.setOverlayPainter(painters);
         Toolkit.getDefaultToolkit().sync();
-    }
-
-    public ArrayList<StreetLight> getLampList() {
-        return lampList;
     }
 
     private Optional<Car> getNearestCar(GeoPosition position) {

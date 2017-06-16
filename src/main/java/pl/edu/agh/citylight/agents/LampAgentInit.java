@@ -14,10 +14,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Vector;
 
-/**
- * Created by Adam on 23.05.2017.
- */
-public class LampAgentInit extends Agent {
+public class LampAgentInit extends LampAgent2 {
     private BufferedReader br = null;
     private static final String FILENAME = "/agents.txt";
     private ArrayList<String> cords = new ArrayList<>();
@@ -34,8 +31,7 @@ public class LampAgentInit extends Agent {
         for(String c : cords) {
             try {
                 String[] _cords = c.split(";");
-                map.addStreetLight(new GeoPosition(Double.parseDouble(_cords[0]), Double.parseDouble(_cords[1])), new AID("lamp"+_counter, AID.ISLOCALNAME));
-                Object[] argss = {"2",map,map.getLampList().get(_counter)};
+                Object[] argss = {"2",map,map.addStreetLight(new GeoPosition(Double.parseDouble(_cords[0]), Double.parseDouble(_cords[1])), new AID("lamp"+_counter, AID.ISLOCALNAME))};
                 ac = cc.createNewAgent("lamp"+_counter, "pl.edu.agh.citylight.agents.LampAgent2", argss);
                 ac.start();
                 agents.add(new AID("lamp"+_counter, AID.ISLOCALNAME));
