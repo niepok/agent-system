@@ -1,9 +1,9 @@
-package pl.edu.agh.citylight.mapping;
+package pl.edu.agh.citylight.mapping.waypoints;
 
 import jade.core.AID;
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.viewer.GeoPosition;
-import pl.edu.agh.citylight.agents.LampAgent2;
+import pl.edu.agh.citylight.mapping.Intensity;
 
 public class StreetLight extends Waypoint2D {
     private AID agent;
@@ -25,7 +25,7 @@ public class StreetLight extends Waypoint2D {
         this.lightIntensity = lightIntensity;
     }
 
-    StreetLight(GeoPosition geoPosition, JXMapViewer mapViewer, AID agent){
+    public StreetLight(GeoPosition geoPosition, JXMapViewer mapViewer, AID agent){
         super(geoPosition, mapViewer);
         this.agent=agent;
     }

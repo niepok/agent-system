@@ -2,6 +2,7 @@ package pl.edu.agh.citylight.mapping;
 
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.viewer.WaypointRenderer;
+import pl.edu.agh.citylight.mapping.waypoints.Waypoint2D;
 
 import javax.imageio.ImageIO;
 import java.awt.*;

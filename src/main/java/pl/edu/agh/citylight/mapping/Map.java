@@ -8,6 +8,10 @@ import org.jxmapviewer.input.PanMouseInputListener;
 import org.jxmapviewer.input.ZoomMouseWheelListenerCursor;
 import org.jxmapviewer.painter.CompoundPainter;
 import org.jxmapviewer.viewer.*;
+import pl.edu.agh.citylight.mapping.waypoints.Car;
+import pl.edu.agh.citylight.mapping.waypoints.Pedestrian;
+import pl.edu.agh.citylight.mapping.waypoints.StreetLight;
+import pl.edu.agh.citylight.mapping.waypoints.Waypoint2D;
 
 import javax.swing.event.MouseInputListener;
 import java.awt.*;

@@ -5,10 +5,10 @@ import jade.core.AID;
 import jade.core.behaviours.*;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import pl.edu.agh.citylight.mapping.Car;
+import pl.edu.agh.citylight.mapping.waypoints.Car;
 import pl.edu.agh.citylight.mapping.Intensity;
 import pl.edu.agh.citylight.mapping.Map;
-import pl.edu.agh.citylight.mapping.StreetLight;
+import pl.edu.agh.citylight.mapping.waypoints.StreetLight;
 
 
 import java.util.*;

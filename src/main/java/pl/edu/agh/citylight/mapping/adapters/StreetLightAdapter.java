@@ -1,14 +1,11 @@
 package pl.edu.agh.citylight.mapping.adapters;
 
 import org.jxmapviewer.viewer.GeoPosition;
-import pl.edu.agh.citylight.App;
 import pl.edu.agh.citylight.mapping.Map;
-import pl.edu.agh.citylight.mapping.StreetLight;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Optional;
 
 import static java.awt.event.MouseEvent.BUTTON1;
 import static java.awt.event.MouseEvent.BUTTON3;
